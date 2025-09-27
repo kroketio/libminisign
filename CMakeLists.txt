@@ -47,8 +47,12 @@ target_compile_definitions(minisign PRIVATE
         TRUSTED_COMMENT_PREFIX="${TRUSTED_COMMENT_PREFIX}"
 )
 
-add_executable(example example.cpp)
-target_link_libraries(example PRIVATE minisign)
+add_executable(test tests/the_best_test.cpp)
+target_link_libraries(test PRIVATE minisign)
+set_target_properties(test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LINK_FLAGS_RELEASE -s
+)
 
 # installation
 # -----------------------------
