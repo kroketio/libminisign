@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: minisign
+Description: Minisign library
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lminisign @LIBSODIUM_LDFLAGS_OTHER@
+Cflags: -I${includedir} @LIBSODIUM_CFLAGS@ @LIBSODIUM_CFLAGS_OTHER@
