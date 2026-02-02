@@ -4,14 +4,13 @@
 extern "C" {
 #endif
 
-#include <stdbool.h>
 #include <sodium.h>
 
 extern char* CONFIG_DIR;
 extern char* PWD;
 extern char* PATH_PK;
 extern char* PATH_SK;
-extern bool MINISIGN_INIT;
+extern int MINISIGN_INIT;
 
 #define COMMENTMAXBYTES                1024
 #define KEYNUMBYTES                    8

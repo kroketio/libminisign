@@ -33,7 +33,7 @@ The header is documented, see [minisign.h](include/minisign/minisign.h) for more
 #include <minisign/minisign.h>
 
 int main() {
-    bool res;
+    int res;
     const char* password = "some_password";
 
     // init

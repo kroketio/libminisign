@@ -2,7 +2,6 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -154,7 +153,7 @@ sig_load(const char *sig_contents,
 }
 
 static PubkeyStruct *
-pubkey_load_string(const char *pubkey_s, bool *res) {
+pubkey_load_string(const char *pubkey_s, int *res) {
   PubkeyStruct *pubkey_struct;
   size_t pubkey_struct_len;
 
@@ -162,19 +161,19 @@ pubkey_load_string(const char *pubkey_s, bool *res) {
   if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s, sizeof *pubkey_struct,
                  strlen(pubkey_s), &pubkey_struct_len) == NULL ||
       pubkey_struct_len != sizeof *pubkey_struct) {
-    *res = false;
+    *res = 0;
     fprintf(stderr, "minisign: base64 conversion failed - was an actual public key given? %s\n", __func__);
   }
   if (memcmp(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg) != 0) {
-    *res = false;
+    *res = 0;
     fprintf(stderr, "minisign: Unsupported signature algorithm: %s\n", __func__);
   }
-  *res = true;
+  *res = 1;
   return pubkey_struct;
 }
 
 PubkeyStruct *
-pubkey_load_file(const char *pk_file, bool *res) {
+pubkey_load_file(const char *pk_file, int *res) {
   char pk_comment[COMMENTMAXBYTES];
   PubkeyStruct *pubkey_struct = NULL;
   FILE *fp;
@@ -185,7 +184,7 @@ pubkey_load_file(const char *pk_file, bool *res) {
     fprintf(stderr, "minisign: error (%s): unable to open public key file: %s\n",
             __func__, pk_file);
     if (res)
-      *res = false;
+      *res = 0;
     return NULL;
   }
 
@@ -194,7 +193,7 @@ pubkey_load_file(const char *pk_file, bool *res) {
             __func__, pk_file);
     fclose(fp);
     if (res)
-      *res = false;
+      *res = 0;
     return NULL;
   }
 
@@ -204,7 +203,7 @@ pubkey_load_file(const char *pk_file, bool *res) {
     fprintf(stderr, "minisign: error (%s): memory allocation failed\n", __func__);
     fclose(fp);
     if (res)
-      *res = false;
+      *res = 0;
     return NULL;
   }
 
@@ -214,7 +213,7 @@ pubkey_load_file(const char *pk_file, bool *res) {
     free(pubkey_s);
     fclose(fp);
     if (res)
-      *res = false;
+      *res = 0;
     return NULL;
   }
 
@@ -228,15 +227,15 @@ pubkey_load_file(const char *pk_file, bool *res) {
   }
 
   if (res)
-    *res = true;
+    *res = 1;
   return pubkey_struct;
 }
 
 /* you need to free this pubkey struct */
-PubkeyStruct *pubkey_load(const char *pubkey_s, bool *res) {
+PubkeyStruct *pubkey_load(const char *pubkey_s, int *res) {
   if (pubkey_s == NULL) {
     fprintf(stderr, "A public key is required");
-    *res = false;
+    *res = 0;
     return NULL;
   }
 
@@ -255,7 +254,7 @@ seckey_compute_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStru
   crypto_generichash_final(&hs, chk, sizeof seckey_struct->keynum_sk.chk);
 }
 
-static bool
+static int
 decrypt_key(char *const pwd, SeckeyStruct *const seckey_struct, unsigned char chk[crypto_generichash_BYTES]) {
   unsigned char *stream;
 
@@ -265,7 +264,7 @@ decrypt_key(char *const pwd, SeckeyStruct *const seckey_struct, unsigned char ch
                                          le64_load(seckey_struct->kdf_opslimit_le),
                                          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
     fprintf(stderr, "Unable to complete key derivation - This probably means out of memory");
-    return false;
+    return 0;
   }
 
   xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
@@ -274,10 +273,10 @@ decrypt_key(char *const pwd, SeckeyStruct *const seckey_struct, unsigned char ch
   seckey_compute_chk(chk, seckey_struct);
   if (memcmp(chk, seckey_struct->keynum_sk.chk, crypto_generichash_BYTES) != 0) {
     fprintf(stderr, "Wrong password for that key");
-    return false;
+    return 0;
   }
   sodium_memzero(chk, crypto_generichash_BYTES);
-  return true;
+  return 1;
 }
 
 static void
@@ -316,7 +315,7 @@ encrypt_key(SeckeyStruct *const seckey_struct) {
 }
 
 SeckeyStruct *
-seckey_load(char *const pwd, char *const sk_comment_line, bool *res) {
+seckey_load(char *const pwd, char *const sk_comment_line, int* res) {
   char sk_comment_line_buf[COMMENTMAXBYTES];
   unsigned char chk[crypto_generichash_BYTES];
   SeckeyStruct *seckey_struct;
@@ -330,7 +329,7 @@ seckey_load(char *const pwd, char *const sk_comment_line, bool *res) {
   }
   if (fgets(sk_comment_line_buf, (int) sizeof sk_comment_line_buf, fp) == NULL) {
     fprintf(stderr, "Error while loading the secret key file");
-    *res = false;
+    *res = 0;
     return NULL;
   }
   if (sk_comment_line != NULL) {
@@ -342,7 +341,7 @@ seckey_load(char *const pwd, char *const sk_comment_line, bool *res) {
   seckey_struct = xsodium_malloc(sizeof *seckey_struct);
   if (fgets(seckey_s, (int) seckey_s_size, fp) == NULL) {
     fprintf(stderr, "Error while loading the secret key file");
-    *res = false;
+    *res = 0;
     return NULL;
   }
   trim(seckey_s);
@@ -351,35 +350,35 @@ seckey_load(char *const pwd, char *const sk_comment_line, bool *res) {
                  strlen(seckey_s), &seckey_struct_len) == NULL ||
       seckey_struct_len != sizeof *seckey_struct) {
     fprintf(stderr, "base64 conversion failed - was an actual secret key given?");
-    *res = false;
+    *res = 0;
     return NULL;
   }
   sodium_free(seckey_s);
   if (memcmp(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg) != 0) {
     fprintf(stderr, "Unsupported signature algorithm");
-    *res = false;
+    *res = 0;
     return NULL;
   }
   if (memcmp(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg) != 0) {
     fprintf(stderr, "Unsupported checksum function");
-    *res = false;
+    *res = 0;
     return NULL;
   }
   if (memcmp(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg) == 0) {
     decrypt_key(pwd, seckey_struct, chk);
   } else if (memcmp(seckey_struct->kdf_alg, KDFNONE, sizeof seckey_struct->kdf_alg) != 0) {
     fprintf(stderr, "Unsupported key derivation function");
-    *res = false;
+    *res = 0;
     return NULL;
   }
 
-  *res = true;
+  *res = 1;
   return seckey_struct;
 }
 
-bool
-verify(PubkeyStruct *pubkey_struct, const unsigned char *message_contents, const unsigned int message_size,
-       const char *sig_contents) {
+int
+verify(const PubkeyStruct* pubkey_struct, const unsigned char* message_contents, const unsigned int message_size,
+       const char* sig_contents) {
   char trusted_comment[TRUSTEDCOMMENTMAXBYTES];
   unsigned char global_sig[crypto_sign_BYTES];
   FILE *info_fp = stdout;
@@ -400,14 +399,14 @@ verify(PubkeyStruct *pubkey_struct, const unsigned char *message_contents, const
             le64_load(sig_struct->keynum),
             le64_load(pubkey_struct->keynum_pk.keynum));
     free(message_hashed);
-    return false;
+    return 0;
   }
 
   if (crypto_sign_verify_detached(sig_struct->sig, message_hashed, message_hashed_len,
                                   pubkey_struct->keynum_pk.pk) != 0) {
     fprintf(stderr, "Signature verification failed\n");
     free(message_hashed);
-    return false;
+    return 0;
   }
   free(message_hashed);
 
@@ -419,12 +418,12 @@ verify(PubkeyStruct *pubkey_struct, const unsigned char *message_contents, const
                                   (sizeof sig_struct->sig) + trusted_comment_len,
                                   pubkey_struct->keynum_pk.pk) != 0) {
     fprintf(stderr, "Comment signature verification failed\n");
-    return false;
+    return 0;
   }
 
   free(sig_and_trusted_comment);
   free(sig_struct);
-  return true;
+  return 1;
 }
 
 static char *
@@ -465,22 +464,22 @@ default_trusted_comment(const char *message_file, int hashed) {
   return ret;
 }
 
-bool sign_memory(const PubkeyStruct *pubkey_struct,
+int sign_memory(const PubkeyStruct *pubkey_struct,
                  const unsigned char *message_contents, size_t message_len,
                  const char *comment, const char *trusted_comment,
                  char **out_sig, size_t *out_sig_len,
-                 bool verification) {
+                 int verification) {
 
   if (!comment || !trusted_comment) {
     fprintf(stderr, "minisign: error: comment and trusted comment are required\n");
-    return false;
+    return 0;
   }
 
   // hash the input message
   unsigned char *hashed_message = message_load_hashed(message_contents, (unsigned int) message_len);
   if (!hashed_message) {
     fprintf(stderr, "minisign: error: unable to hash message\n");
-    return false;
+    return 0;
   }
 
   // signature struct
@@ -493,7 +492,7 @@ bool sign_memory(const PubkeyStruct *pubkey_struct,
                            SECKEY->keynum_sk.sk) != 0) {
     fprintf(stderr, "minisign: error: unable to sign message\n");
     free(hashed_message);
-    return false;
+    return 0;
   }
   free(hashed_message);
 
@@ -502,7 +501,7 @@ bool sign_memory(const PubkeyStruct *pubkey_struct,
   unsigned char *sig_and_trusted_comment = xmalloc(sizeof sig_struct.sig + trusted_comment_len);
   if (!sig_and_trusted_comment) {
     fprintf(stderr, "minisign: error: memory allocation failed\n");
-    return false;
+    return 0;
   }
   memcpy(sig_and_trusted_comment, sig_struct.sig, sizeof sig_struct.sig);
   memcpy(sig_and_trusted_comment + sizeof sig_struct.sig, trusted_comment, trusted_comment_len);
@@ -513,7 +512,7 @@ bool sign_memory(const PubkeyStruct *pubkey_struct,
                            SECKEY->keynum_sk.sk) != 0) {
     fprintf(stderr, "minisign: error: unable to compute global signature\n");
     free(sig_and_trusted_comment);
-    return false;
+    return 0;
   }
 
   /* optional verification */
@@ -524,7 +523,7 @@ bool sign_memory(const PubkeyStruct *pubkey_struct,
                                    pubkey_struct->keynum_pk.pk) != 0)) {
     fprintf(stderr, "minisign: error: verification would fail with the given public key\n");
     free(sig_and_trusted_comment);
-    return false;
+    return 0;
   }
 
   free(sig_and_trusted_comment);
@@ -535,7 +534,7 @@ bool sign_memory(const PubkeyStruct *pubkey_struct,
   FILE *fp = open_memstream(&mem_buf, &mem_len);
   if (!fp) {
     fprintf(stderr, "minisign: error: unable to open memory stream\n");
-    return false;
+    return 0;
   }
 
   xfprintf(fp, "%s%s\n", COMMENT_PREFIX, comment);
@@ -549,11 +548,11 @@ bool sign_memory(const PubkeyStruct *pubkey_struct,
   *out_sig = mem_buf;
   *out_sig_len = mem_len;
 
-  return true;
+  return 1;
 }
 
-bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
-               const char *path_sig, const char *comment, const char *trusted_comment, bool verification) {
+int sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
+               const char *path_sig, const char *comment, const char *trusted_comment, int verification) {
 
   unsigned char global_sig[crypto_sign_BYTES];
   SigStruct sig_struct;
@@ -568,14 +567,14 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
 
   if (!comment || !trusted_comment) {
     fprintf(stderr, "minisign: error: comment and trusted comment are required\n");
-    return false;
+    return 0;
   }
 
   hashed_message = message_load_hashed_file(&message_len, path_message);
   if (!hashed_message) {
     fprintf(stderr, "minisign: error: unable to load message file '%s'\n", path_message);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
@@ -585,13 +584,13 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
     fprintf(stderr, "minisign: error: unable to sign message\n");
     free(hashed_message);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   if ((fp = fopen(path_sig, "w")) == NULL) {
     fprintf(stderr, "minisign: error: unable to open signature file '%s'\n", path_sig);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   comment_len = strlen(comment);
@@ -612,7 +611,7 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
     fprintf(stderr, "minisign: error: trusted comment too long\n");
     fclose(fp);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   sig_and_trusted_comment = xmalloc((sizeof sig_struct.sig) + trusted_comment_len);
@@ -620,7 +619,7 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
     fprintf(stderr, "minisign: error: memory allocation failed\n");
     fclose(fp);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   memcpy(sig_and_trusted_comment, sig_struct.sig, sizeof sig_struct.sig);
@@ -633,7 +632,7 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
     free(sig_and_trusted_comment);
     fclose(fp);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   if (verification && pubkey_struct != NULL &&
@@ -645,7 +644,7 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
     free(sig_and_trusted_comment);
     fclose(fp);
     free(tmp_trusted_comment);
-    return false;
+    return 0;
   }
 
   xfput_b64(fp, (unsigned char *) (void *) &global_sig, sizeof global_sig);
@@ -655,7 +654,7 @@ bool sign_file(const PubkeyStruct *pubkey_struct, const char *path_message,
   free(sig_and_trusted_comment);
   free(tmp_trusted_comment);
 
-  return true;
+  return 1;
 }
 
 static void
@@ -671,7 +670,7 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct) {
   xfclose(fp);
 }
 
-bool generate_keys(const char *comment, int unencrypted_key) {
+int generate_keys(const char *comment, int unencrypted_key) {
   SeckeyStruct *seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
   PubkeyStruct *pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
   FILE *fp;
@@ -699,26 +698,26 @@ bool generate_keys(const char *comment, int unencrypted_key) {
   sodium_free(seckey_struct);
 
   write_pk_file(PATH_PK, pubkey_struct);
-  return true;
+  return 1;
 }
 
-bool set_config_directory(const char *config_dir) {
+int set_config_directory(const char *config_dir) {
   if (!config_dir) {
     fprintf(stderr, "minisign [%s] error: config_dir is NULL\n", __func__);
-    return false;
+    return 0;
   }
 
   // check if directory exists
   struct stat st;
   if (stat(config_dir, &st) != 0 || !S_ISDIR(st.st_mode)) {
     fprintf(stderr, "minisign [%s] error: directory '%s' does not exist\n", __func__, config_dir);
-    return false;
+    return 0;
   }
 
   CONFIG_DIR = strdup(config_dir);
   if (!CONFIG_DIR) {
     fprintf(stderr, "minisign [%s] error: strdup failed for CONFIG_DIR\n", __func__);
-    return false;
+    return 0;
   }
 
   // PATH_SK
@@ -726,7 +725,7 @@ bool set_config_directory(const char *config_dir) {
   PATH_SK = (char *) malloc(sk_len);
   if (!PATH_SK) {
     fprintf(stderr, "minisign [%s] error: malloc failed for SK_FILE\n", __func__);
-    return false;
+    return 0;
   }
   snprintf(PATH_SK, sk_len, "%s/minisign.key", CONFIG_DIR);
 
@@ -735,9 +734,9 @@ bool set_config_directory(const char *config_dir) {
   PATH_PK = (char *) malloc(pk_len);
   if (!PATH_PK) {
     fprintf(stderr, "minisign [%s] error: malloc failed for PK_FILE\n", __func__);
-    return false;
+    return 0;
   }
   snprintf(PATH_PK, pk_len, "%s/minisign.pub", CONFIG_DIR);
 
-  return true;
+  return 1;
 }

@@ -6,7 +6,7 @@ extern "C" {
 }
 
 int main() {
-  bool res = false;
+  int res = 0;
   constexpr char password[] = "test";
 
   printf("=== init\n");
@@ -40,7 +40,7 @@ int main() {
   ofs.close();
   const char path_message[] = "/tmp/minisign_test";
   const char path_message_sig_output[] = "/tmp/minisign_test.minisig";
-  res = minisign_sign_file(path_message, path_message_sig_output, "foo: some untrusted comment", "bar: some trusted comment", true);
+  res = minisign_sign_file(path_message, path_message_sig_output, "foo: some untrusted comment", "bar: some trusted comment", 1);
   if (res) printf("file signed\n");
   else return 1;
 

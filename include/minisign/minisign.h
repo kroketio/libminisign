@@ -13,7 +13,6 @@ extern "C" {
 #include "globals.h"
 #include <sodium.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <time.h>
@@ -24,11 +23,11 @@ extern "C" {
  * @param path_keys_directory     Path to config directory.
  * @param password                Optional password for the secret key.
  *
- * @return true on success, false on failure.
+ * @return 1 on success, 0 on failure.
  */
-MINISIGN_API bool minisign_init(
-    const char *path_keys_directory,
-    const char *password);
+MINISIGN_API int minisign_init(
+    const char* path_keys_directory,
+    const char* password);
 
 /**
  * Signs a file.
@@ -41,16 +40,16 @@ MINISIGN_API bool minisign_init(
  * @param path_sig        Path to the output signature file.
  * @param comment         Comment to include in the signature
  * @param trusted_comment Trusted comment to include in the signature (optional)
- * @param verification    If true, before writing the file, verify the generated signature (optional)
+ * @param verification    If 1, before writing the file, verify the generated signature (optional)
  *
- * @return true on success, false on failure.
+ * @return 1 on success, 0 on failure.
  */
-MINISIGN_API bool minisign_sign_file(
-    const char *path_message,
-    const char *path_sig,
-    const char *comment,
-    const char *trusted_comment,
-    bool verification);
+MINISIGN_API int minisign_sign_file(
+    const char* path_message,
+    const char* path_sig,
+    const char* comment,
+    const char* trusted_comment,
+    int verification);
 
 /**
  * Signs a message and produces a signature.
@@ -70,18 +69,18 @@ MINISIGN_API bool minisign_sign_file(
  * @param trusted_comment Optional trusted comment to include in the signature.
  * @param out_sig         Output pointer to the generated signature buffer.
  * @param out_sig_len     Output length of the generated signature buffer.
- * @param verification    If true, before writing the file, verify the generated signature (optional)
+ * @param verification    If 1, before writing the file, verify the generated signature (optional)
  *
- * @return true on success, false on failure.
+ * @return 1 on success, 0 on failure.
  */
-MINISIGN_API bool minisign_sign(
-    const unsigned char *message,
+MINISIGN_API int minisign_sign(
+    const unsigned char* message,
     size_t message_len,
-    const char *comment,
-    const char *trusted_comment,
-    char **out_sig,
-    size_t *out_sig_len,
-    bool verification);
+    const char* comment,
+    const char* trusted_comment,
+    char** out_sig,
+    size_t* out_sig_len,
+    int verification);
 
 /**
  * Verifies a signed file against a public key.
@@ -93,12 +92,12 @@ MINISIGN_API bool minisign_sign(
  * @param path_message   Path to the message file to verify.
  * @param path_sig       Path to the signature file to verify.
  *
- * @return true if the signature is valid, false otherwise.
+ * @return 1 if the signature is valid, 0 otherwise.
  */
-MINISIGN_API bool minisign_verify_file(
-    const char *pubkey_s,
-    const char *path_message,
-    const char *path_sig);
+MINISIGN_API int minisign_verify_file(
+    const char* pubkey_s,
+    const char* path_message,
+    const char* path_sig);
 
 /**
  * Verifies a signed message buffer against a public key.
@@ -111,13 +110,13 @@ MINISIGN_API bool minisign_verify_file(
  * @param message_size     Length of the message buffer.
  * @param message_sig      Signature string to verify against.
  *
- * @return true if the signature is valid, false otherwise.
+ * @return 1 if the signature is valid, 0 otherwise.
  */
-MINISIGN_API bool minisign_verify(
-    const char *pubkey_s,
-    const unsigned char *message_contents,
+MINISIGN_API int minisign_verify(
+    const char* pubkey_s,
+    const unsigned char* message_contents,
     unsigned int message_size,
-    const char *message_sig);
+    const char* message_sig);
 
 /* do not free PATH_SK */
 MINISIGN_API inline const char* minisign_get_sk_path() {

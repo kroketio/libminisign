@@ -4,6 +4,6 @@ char* CONFIG_DIR;
 char* PWD;
 char* PATH_PK;
 char* PATH_SK;
-bool MINISIGN_INIT = false;
+int MINISIGN_INIT = 0;
 SeckeyStruct* SECKEY = NULL;
 PubkeyStruct* PUBKEY = NULL;
