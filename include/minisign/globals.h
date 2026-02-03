@@ -7,13 +7,7 @@ extern "C" {
 #include <stdarg.h>
 #include <sodium.h>
 
-// #define minisign_err(...) \
-//     fprintf(stderr, "%s:%d: ", strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__), \
-//     fprintf(stderr, __VA_ARGS__), \
-//     fprintf(stderr, "\n")
-
-
-static inline void minisign_err_impl(const char* file, int line, const char* fmt, ...) {
+static void minisign_err_impl(const char* file, int line, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     fprintf(stderr, "%s:%d: ", file, line);
