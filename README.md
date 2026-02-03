@@ -1,9 +1,25 @@
 # libminisign - Sign and Verify
 
-Minisign uses the Ed25519 public-key signature system with small, and fast signatures.
+libminisign is a dead simple library to sign files and verify signatures.
 
-This is the library version of [Minisign](https://github.com/jedisct1/minisign) by Frank Denis, as well 
-as a CLI tool. It provides pkgconfig, and CMake config for consumption in other applications.
+```c
+char key_name[] = "test";
+char key_dir[] = "/home/user/.minisign/";
+char password[] = "test";
+char test_file[] = "/tmp/test_file.txt";
+char test_file_sig[] = "/tmp/test_file.txt.sig";
+  
+minisign_init(key_dir);
+minisign_generate(key_name, key_dir, password);
+
+minisign_sign_file(key_name, key_dir, password, test_file, test_file_sig, "foo", "bar", 1);
+
+char* pubkey = minisign_read_pubkey(key_name, key_dir);
+minisign_verify(pubkey, message, sizeof(message)-1, signature);
+```
+
+This is a library implementation of [Minisign](https://github.com/jedisct1/minisign). It provides a pkgconfig, and 
+CMake config for consumption in other applications.
 
 ## License
 
@@ -25,7 +41,7 @@ The header is documented, see [minisign.h](include/minisign/minisign.h) for more
 
 ## Example
 
-This library can be consumed by C and C++ programs. See [example.cpp](example.cpp).
+See [example.cpp](example.cpp).
 
 ## Installation
 
@@ -33,7 +49,7 @@ This library can be consumed by C and C++ programs. See [example.cpp](example.cp
 sudo apt install -y g++ cmake libsodium-dev
 
 cmake -Bbuild .
-make -Cbuild -j4
+make -Cbuild -j6
 
 # system-wide installation
 sudo make -Cbuild install
@@ -44,6 +60,9 @@ sudo make -Cbuild install
 pass `-DCMAKE_INSTALL_PREFIX=/tmp/test/` to CMake.
 
 ```text
+cmake -Bbuild -DCMAKE_INSTALL_PREFIX=/tmp/test/ .
+make -Cbuild -j6 install
+
 -- Installing: /tmp/test/lib/libminisign.so
 -- Installing: /tmp/test/include/minisign/minisign.h
 -- Installing: /tmp/test/include/minisign/globals.h
@@ -54,7 +73,7 @@ pass `-DCMAKE_INSTALL_PREFIX=/tmp/test/` to CMake.
 -- Installing: /tmp/test/lib/pkgconfig/minisign.pc
 ```
 
-### Consuming with CMake
+## CMake
 
 ```cmake
 cmake_minimum_required(VERSION 3.30)
@@ -69,3 +88,7 @@ target_link_libraries(my_program PUBLIC minisign::minisign)
 ## Other implementations
 
 - [jedisct1/rust-minisign](https://github.com/jedisct1/rust-minisign).
+
+## Thanks
+
+Frank Denis, the author of minisign.
