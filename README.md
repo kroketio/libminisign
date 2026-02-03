@@ -30,11 +30,13 @@ This library can be consumed by C and C++ programs. See [example.cpp](example.cp
 ## Installation
 
 ```bash
-sudo apt install -y cmake libsodium-dev
+sudo apt install -y g++ cmake libsodium-dev
 
 cmake -Bbuild .
 make -Cbuild -j4
-make -Cbuild install
+
+# system-wide installation
+sudo make -Cbuild install
 ```
 
 #### Custom install prefix
