@@ -237,7 +237,7 @@ pubkey_load_file(const char *pk_file) {
   }
 
   pubkey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof(*pubkey_struct)) + 2U;
-  pubkey_s = malloc(pubkey_s_size);
+  pubkey_s = xmalloc(pubkey_s_size);
   if (!pubkey_s) {
     minisign_err("memory allocation failed");
     fclose(fp);
@@ -280,7 +280,7 @@ PubkeyStruct *pubkey_load(const char *pubkey_s) {
     const char *second_nl = strchr(second_line_start, '\n');
     size_t len = second_nl ? (size_t)(second_nl - second_line_start) : strlen(second_line_start);
 
-    key_copy = malloc(len + 1);
+    key_copy = xmalloc(len + 1);
     if (!key_copy) {
       minisign_err("Out of memory");
       return NULL;
@@ -504,7 +504,7 @@ default_trusted_comment(const char *message_file, int hashed) {
   // calculate required length (+1 for null terminator)
   const int len = snprintf(NULL, 0, "timestamp:%lu\tfile:%s%s", (unsigned long) ts, basename, hash_str) + 1;
 
-  char* ret = malloc(len);
+  char* ret = xmalloc(len);
   if (!ret) {
     minisign_err("malloc()");
     return NULL;
@@ -808,7 +808,7 @@ char* read_file(const char* path) {
   }
   rewind(f);
 
-  char* buf = malloc((size_t)size + 1);
+  char* buf = xmalloc((size_t)size + 1);
   if (!buf) {
     fclose(f);
     return NULL;
