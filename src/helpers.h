@@ -22,10 +22,6 @@ uint64_t le64_load(const unsigned char *p);
 
 void le64_store(unsigned char *p, uint64_t x);
 
-void exit_err(const char *msg) __attribute__((noreturn));
-
-void exit_msg(const char *msg) __attribute__((noreturn));
-
 void *xmalloc(size_t size);
 
 char *xstrdup(const char *str);

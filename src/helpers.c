@@ -44,14 +44,14 @@ le64_store(unsigned char *p, uint64_t x)
     p[7] = (unsigned char) (x >> 56);
 }
 
-void
+static void
 exit_err(const char *msg)
 {
     perror(msg == NULL ? "" : msg);
     exit(2);
 }
 
-void
+static void
 exit_msg(const char *msg)
 {
     fprintf(stderr, "%s\n", msg);

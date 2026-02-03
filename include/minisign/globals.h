@@ -4,12 +4,28 @@
 extern "C" {
 #endif
 
+#include <stdarg.h>
 #include <sodium.h>
 
+// #define minisign_err(...) \
+//     fprintf(stderr, "%s:%d: ", strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__), \
+//     fprintf(stderr, __VA_ARGS__), \
+//     fprintf(stderr, "\n")
+
+
+static inline void minisign_err_impl(const char* file, int line, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "%s:%d: ", file, line);
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    va_end(args);
+}
+
+#define minisign_err(...) \
+    minisign_err_impl(strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, __VA_ARGS__)
+
 extern char* CONFIG_DIR;
-extern char* PWD;
-extern char* PATH_PK;
-extern char* PATH_SK;
 extern int MINISIGN_INIT;
 
 #define COMMENTMAXBYTES                1024
@@ -76,9 +92,6 @@ typedef enum Action_ {
     ACTION_RECREATE_PK,
     ACTION_UPDATE_PASSWORD
 } Action;
-
-extern SeckeyStruct* SECKEY;
-extern PubkeyStruct* PUBKEY;
 
 #ifdef __cplusplus
 }
