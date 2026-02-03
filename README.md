@@ -1,6 +1,7 @@
 # libminisign - Sign and Verify
 
-libminisign is a dead simple library to sign files and verify signatures.
+libminisign is a dead simple library to sign files and verify signatures from C or C++ applications 
+(via pkgconfig, or CMake). It also comes with CLI tools.
 
 ```c
 char key_name[] = "test";
@@ -18,8 +19,7 @@ char* pubkey = minisign_read_pubkey(key_name, key_dir);
 minisign_verify(pubkey, message, sizeof(message)-1, signature);
 ```
 
-This is a library implementation of [Minisign](https://github.com/jedisct1/minisign). It provides a pkgconfig, and 
-CMake config for consumption in other applications.
+This is a library implementation of [Minisign](https://github.com/jedisct1/minisign).
 
 ## License
 
@@ -38,6 +38,22 @@ The header is documented, see [minisign.h](include/minisign/minisign.h) for more
 | `minisign_verify` | Verifies an in-memory message buffer against a signature string using the provided public key. Returns 1 if valid, 0 otherwise. |
 | `minisign_verify_file` | Verifies a file against a given signature file using the provided public key. Returns 1 if valid, 0 otherwise. |
 
+## Tools
+
+#### sign-keygen
+
+Similar to `ssh-keygen`.
+
+```text
+$ sign-keygen 
+Generating public/private key pair.
+Enter file in which to save the key (/home/user/.minisign/id_ed25519): 
+Enter passphrase for "/home/user/.minisign/id_ed25519" (empty for no passphrase): 
+Enter same passphrase again: 
+success
+seckey: /home/user/.minisign/id_ed25519
+pubkey: /home/user/.minisign/id_ed25519.pub [RWR8WcW+J8S9CiTxbDlSlSjmwgXRpXmbCkhLK6nCdg/YU9dorVZUbo9a]
+```
 
 ## Example
 
@@ -63,14 +79,17 @@ pass `-DCMAKE_INSTALL_PREFIX=/tmp/test/` to CMake.
 cmake -Bbuild -DCMAKE_INSTALL_PREFIX=/tmp/test/ .
 make -Cbuild -j6 install
 
+-- Installing: /tmp/test/lib/libminisign.so.1.2
+-- Installing: /tmp/test/lib/libminisign.so.1
 -- Installing: /tmp/test/lib/libminisign.so
 -- Installing: /tmp/test/include/minisign/minisign.h
 -- Installing: /tmp/test/include/minisign/globals.h
 -- Installing: /tmp/test/lib/cmake/minisign/minisignTargets.cmake
--- Installing: /tmp/test/lib/cmake/minisign/minisignTargets-debug.cmake
+-- Installing: /tmp/test/lib/cmake/minisign/minisignTargets-noconfig.cmake
 -- Installing: /tmp/test/lib/cmake/minisign/minisignConfig.cmake
 -- Installing: /tmp/test/lib/cmake/minisign/minisignConfigVersion.cmake
 -- Installing: /tmp/test/lib/pkgconfig/minisign.pc
+-- Installing: /tmp/test/bin/sign-keygen
 ```
 
 ## CMake
