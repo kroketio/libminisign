@@ -1,0 +1,3 @@
+#pragma once
+
+#define MINISIGN_VERSION "@CMAKE_PROJECT_VERSION@"

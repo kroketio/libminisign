@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.14)
 project(minisign
         LANGUAGES C CXX
-        VERSION 1.1)
+        VERSION 1.2)
 
 set(COMMENT_PREFIX_DEFAULT "untrusted comment: ")
 set(TRUSTED_COMMENT_PREFIX_DEFAULT "trusted comment: ")
+
+configure_file("cmake/config-minisign.h.cmake" "${CMAKE_BINARY_DIR}/src/config-minisign.h")
 
 find_package(PkgConfig REQUIRED)
 
@@ -21,12 +23,18 @@ add_library(minisign SHARED
         src/helpers.c
 )
 
+set_target_properties(minisign PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION 1
+)
+
 target_include_directories(minisign
     PUBLIC
         ${LIBSODIUM_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/src>
         ${CMAKE_CURRENT_SOURCE_DIR}/minisign/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -54,8 +62,13 @@ set_target_properties(test PROPERTIES
         LINK_FLAGS_RELEASE -s
 )
 
-# installation
-# -----------------------------
+add_executable(sign-keygen tools/sign-keygen.c)
+target_include_directories(sign-keygen PRIVATE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/src>)
+target_link_libraries(sign-keygen PRIVATE minisign)
+set_target_properties(sign-keygen PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LINK_FLAGS_RELEASE -s
+)
 
 # Install library
 install(TARGETS minisign
@@ -106,3 +119,8 @@ install(FILES
 # pkg-config
 configure_file(minisign.pc.in minisign.pc @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/minisign.pc" DESTINATION lib/pkgconfig)
+
+# sign-keygen
+install(TARGETS sign-keygen
+        RUNTIME DESTINATION bin
+)
