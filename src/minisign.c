@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -16,7 +17,17 @@
 static int
 ensure_minisign_init() {
   if (!MINISIGN_INIT) {
-    minisign_err("minisign: call minisign_init() first");
+    minisign_err("minisign: call minisign_init(key_dir) first");
+    return 0;
+  }
+  return 1;
+}
+
+static int
+ensure_valid_key_dir_name(const char *key_dir) {
+  const size_t len = strlen(key_dir);
+  if (len == 0 || key_dir[len-1] != '/') {
+    minisign_err("key_dir must end with /");
     return 0;
   }
   return 1;
@@ -38,20 +49,22 @@ minisign_validate_key_name(const char* s) {
 
 int
 minisign_init(char* key_dir) {
+  if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (sodium_init() != 0) {
     minisign_err("Unable to initialize the Sodium library");
     return 0;
   }
 
+  // create key_dir if it does not exist yet
   struct stat st;
-  if (stat(key_dir, &st) != 0) {
-    if (mkdir(key_dir, 0700) != 0) {
-      perror("mkdir");
-      return 0;
-    }
-  } else if (!S_ISDIR(st.st_mode)) {
-    minisign_err("%s exists but is not a directory", key_dir);
-    return 0;
+  if (stat(key_dir, &st) == 0) {
+    if (!S_ISDIR(st.st_mode))
+      return minisign_err("%s exists but is not a directory", key_dir), 0;
+  } else if (errno == ENOENT) {
+    if (mkdir(key_dir, 0700) != 0)
+      return perror("mkdir"), 0;
+  } else {
+    return minisign_err("%s exists but is not a directory", key_dir), 0;
   }
 
   if (!set_config_directory(key_dir)) {
@@ -65,6 +78,7 @@ minisign_init(char* key_dir) {
 
 int
 minisign_generate(const char* key_name, const char* key_dir, const char* password) {
+  if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
     minisign_err("Invalid key name: %s", key_name);
@@ -108,7 +122,7 @@ minisign_sign(
     char** out_sig,
     size_t* out_sig_len,
     int verification) {
-
+  if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
     minisign_err("Invalid key name: %s", key_name);
@@ -163,7 +177,7 @@ minisign_sign_file(
     const char* comment,
     const char* trusted_comment,
     int verification) {
-
+  if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
     minisign_err("Invalid key name: %s", key_name);
@@ -209,10 +223,16 @@ minisign_sign_file(
 
 int
 minisign_verify_file(
-  const char* key_name,
-  const char* key_dir,
-  const char* path,
-  const char* path_sig) {
+    const char* key_name,
+    const char* key_dir,
+    const char* path,
+    const char* path_sig) {
+  if (!ensure_valid_key_dir_name(key_dir)) return 0;
+  if (!ensure_minisign_init()) return 0;
+  if (!minisign_validate_key_name(key_name)) {
+    minisign_err("Invalid key name: %s", key_name);
+    return 0;
+  }
 
   char priv_path[PATH_MAX], pub_path[PATH_MAX];
   const size_t priv_len = snprintf(priv_path, sizeof(priv_path), "%s/%s", key_dir, key_name);
@@ -243,10 +263,11 @@ minisign_verify_file(
 
 int
 minisign_verify(
-  const char* pubkey_string,
-  const unsigned char* message_contents,
-  const unsigned int message_size,
-  const char* message_sig) {
+    const char* pubkey_string,
+    const unsigned char* message_contents,
+    const unsigned int message_size,
+    const char* message_sig) {
+  if (!ensure_minisign_init()) return 0;
   int res = 0;
 
   if (message_sig == NULL) {
@@ -276,12 +297,6 @@ minisign_verify(
 
 char*
 minisign_read_pubkey(const char* key_name, const char* key_dir) {
-  if (!ensure_minisign_init()) return NULL;
-  if (!minisign_validate_key_name(key_name)) {
-    minisign_err("Invalid key name: %s", key_name);
-    return NULL;
-  }
-
   char path[PATH_MAX];
   snprintf(path, sizeof(path), "%s/%s.pub", key_dir, key_name);
   char* res = read_file(path);
@@ -292,12 +307,6 @@ minisign_read_pubkey(const char* key_name, const char* key_dir) {
 
 char*
 minisign_read_seckey(const char* key_name, const char* key_dir) {
-  if (!ensure_minisign_init()) return NULL;
-  if (!minisign_validate_key_name(key_name)) {
-    minisign_err("Invalid key name: %s", key_name);
-    return NULL;
-  }
-
   char path[PATH_MAX];
   snprintf(path, sizeof(path), "%s/%s", key_dir, key_name);
   char* res = read_file(path);
