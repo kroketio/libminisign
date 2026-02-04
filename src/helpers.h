@@ -42,6 +42,8 @@ const char *file_basename(const char *file);
 
 FILE *fopen_create_useronly(const char *file);
 
+int is_printable(const char *str);
+
 #ifdef __cplusplus
 }
 #endif

@@ -131,6 +131,20 @@ sig_load(const char *sig_contents,
           trusted_comment + sizeof(TRUSTED_COMMENT_PREFIX) - 1U,
           strlen(trusted_comment + sizeof(TRUSTED_COMMENT_PREFIX) - 1U) + 1U);
 
+  if (trim(trusted_comment) == 0) {
+    minisign_err("Trusted comment too long");
+    free(contents_copy);
+    free(sig_s);
+    return NULL;
+  }
+
+  if (is_printable(trusted_comment) == 0) {
+    minisign_err("Trusted comment contains unprintable characters");
+    free(contents_copy);
+    free(sig_s);
+    return NULL;
+  }
+
   // fourth line: global signature b64
   global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 2U;
   global_sig_s = xmalloc(global_sig_s_size);
