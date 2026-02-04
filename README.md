@@ -55,6 +55,27 @@ seckey: /home/user/.minisign/id_ed25519
 pubkey: /home/user/.minisign/id_ed25519.pub [RWR8WcW+J8S9CiTxbDlSlSjmwgXRpXmbCkhLK6nCdg/YU9dorVZUbo9a]
 ```
 
+A non-interactive mode is also available, see `--help`.
+
+#### sign-verify
+
+Verify a signed file against a public key.
+
+```text
+Usage:
+  sign-verify [key] <file>
+
+Examples (all achieve the same):
+  sign-verify /path/to/some_key.pub /path/to/file.sig
+  sign-verify /path/to/some_key /path/to/file
+  sign-verify some_key /path/to/file
+  sign-verify /path/to/file
+
+Options:
+  -h, --help     Show this help message and exit
+  -v, --version  Show version information and exit
+```
+
 ## Example
 
 See [example.cpp](example.cpp).
@@ -90,6 +111,7 @@ make -Cbuild -j6 install
 -- Installing: /tmp/test/lib/cmake/minisign/minisignConfigVersion.cmake
 -- Installing: /tmp/test/lib/pkgconfig/minisign.pc
 -- Installing: /tmp/test/bin/sign-keygen
+-- Installing: /tmp/test/bin/sign-verify
 ```
 
 ## CMake

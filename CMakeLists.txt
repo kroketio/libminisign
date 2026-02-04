@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(minisign
         LANGUAGES C CXX
-        VERSION 1.2)
+        VERSION 1.3)
 
 set(COMMENT_PREFIX_DEFAULT "untrusted comment: ")
 set(TRUSTED_COMMENT_PREFIX_DEFAULT "trusted comment: ")
@@ -70,6 +70,14 @@ set_target_properties(sign-keygen PROPERTIES
         LINK_FLAGS_RELEASE -s
 )
 
+add_executable(sign-verify tools/sign-verify.c)
+target_include_directories(sign-verify PRIVATE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/src>)
+target_link_libraries(sign-verify PRIVATE minisign)
+set_target_properties(sign-verify PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LINK_FLAGS_RELEASE -s
+)
+
 # Install library
 install(TARGETS minisign
         EXPORT minisignTargets
@@ -122,5 +130,10 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/minisign.pc" DESTINATION lib/pkgconfi
 
 # sign-keygen
 install(TARGETS sign-keygen
+        RUNTIME DESTINATION bin
+)
+
+# sign-verify
+install(TARGETS sign-verify
         RUNTIME DESTINATION bin
 )

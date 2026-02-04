@@ -27,7 +27,7 @@ static int
 ensure_valid_key_dir_name(const char *key_dir) {
   const size_t len = strlen(key_dir);
   if (len == 0 || key_dir[len-1] != '/') {
-    minisign_err("key_dir must end with /");
+    minisign_err("argument 'key_dir' must end with /");
     return 0;
   }
   return 1;
@@ -81,7 +81,7 @@ minisign_generate(const char* key_name, const char* key_dir, const char* passwor
   if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
-    minisign_err("Invalid key name: %s", key_name);
+    minisign_err("Illegal key name: %s", key_name);
     return 0;
   }
 
@@ -125,7 +125,7 @@ minisign_sign(
   if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
-    minisign_err("Invalid key name: %s", key_name);
+    minisign_err("Illegal key name: %s", key_name);
     return 0;
   }
 
@@ -180,7 +180,7 @@ minisign_sign_file(
   if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
-    minisign_err("Invalid key name: %s", key_name);
+    minisign_err("Illegal key name: %s", key_name);
     return 0;
   }
 
@@ -230,7 +230,7 @@ minisign_verify_file(
   if (!ensure_valid_key_dir_name(key_dir)) return 0;
   if (!ensure_minisign_init()) return 0;
   if (!minisign_validate_key_name(key_name)) {
-    minisign_err("Invalid key name: %s", key_name);
+    minisign_err("Illegal key name: %s", key_name);
     return 0;
   }
 

@@ -68,7 +68,7 @@ main(const int argc, char **argv) {
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
-      printf("sign-keygen %s\n", MINISIGN_VERSION);
+      printf("%s\n", MINISIGN_VERSION);
       return 0;
     }
     if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {

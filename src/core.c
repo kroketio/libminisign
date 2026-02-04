@@ -153,7 +153,7 @@ sig_load(const char *sig_contents,
                  sizeof *sig_struct, strlen(sig_s),
                  &sig_struct_len) == NULL ||
       sig_struct_len != sizeof *sig_struct) {
-    minisign_err("base64 conversion failed - was an actual signature given?");
+    minisign_err("base64 conversion failed - invalid input data");
     free(sig_s);
     free(global_sig_s);
     free(sig_struct);
@@ -179,7 +179,7 @@ sig_load(const char *sig_contents,
                  crypto_sign_BYTES, strlen(global_sig_s),
                  &global_sig_len) == NULL ||
       global_sig_len != crypto_sign_BYTES) {
-    minisign_err("base64 conversion failed - was an actual signature given?");
+    minisign_err("base64 conversion failed - invalid input data");
     free(global_sig_s);
     free(sig_struct);
     return NULL;
@@ -445,6 +445,12 @@ verify(const PubkeyStruct* pubkey_struct, const unsigned char* message_contents,
   size_t trusted_comment_len = 0;
 
   sig_struct = sig_load(sig_contents, global_sig, trusted_comment, sizeof trusted_comment);
+  if (!sig_struct) {
+    free(message_hashed);
+    minisign_err("Could not load signature");
+    return 0;
+  }
+
   message_hashed = message_load_hashed(message_contents, message_size);
 
   if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum, sizeof sig_struct->keynum) != 0) {
@@ -463,6 +469,7 @@ verify(const PubkeyStruct* pubkey_struct, const unsigned char* message_contents,
                                   pubkey_struct->keynum_pk.pk) != 0) {
     minisign_err("Signature verification failed");
     free(message_hashed);
+    free(sig_struct);
     return 0;
   }
   free(message_hashed);
