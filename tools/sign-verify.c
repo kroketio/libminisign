@@ -32,29 +32,6 @@ static int ends_with(const char *s, const char *sfx) {
   return memcmp(s + sl - xl, sfx, xl) == 0;
 }
 
-static int safe_copy(char *dst, size_t n, const char *src) {
-  const size_t l = strlen(src);
-
-  if (l >= n)
-    return 0;
-
-  memcpy(dst, src, l + 1);
-  return 1;
-}
-
-static int safe_join(char *dst, size_t n, const char *a, const char *b) {
-  const size_t al = strlen(a);
-  const size_t bl = strlen(b);
-
-  if (al + bl >= n)
-    return 0;
-
-  memmove(dst, a, al);
-  memmove(dst + al, b, bl);
-  dst[al + bl] = 0;
-  return 1;
-}
-
 static int normalize_dir(char *key_dir) {
   const size_t l = strlen(key_dir);
   if (l == 0)

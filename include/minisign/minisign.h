@@ -160,6 +160,9 @@ minisign_read_seckey(
     const char* key_name,
     const char* key_dir);
 
+MINISIGN_API int safe_copy(char *dst, size_t n, const char *src);
+MINISIGN_API int safe_join(char *dst, size_t n, const char *a, const char *b);
+
 #ifdef __cplusplus
 }
 #endif

@@ -85,11 +85,28 @@ minisign_generate(const char* key_name, const char* key_dir, const char* passwor
     return 0;
   }
 
-  char priv_path[PATH_MAX], pub_path[PATH_MAX];
-  const size_t priv_len = snprintf(priv_path, sizeof(priv_path), "%s/%s", key_dir, key_name);
-  if (priv_len >= sizeof(priv_path)) { minisign_err("Private key path too long: %s/%s", key_dir, key_name); return 0; }
-  const size_t pub_len = snprintf(pub_path, sizeof(pub_path), "%s.pub", priv_path);
-  if (pub_len >= sizeof(pub_path)) { minisign_err("Public key path too long: %s.pub", priv_path); return 0; }
+  char priv_path[PATH_MAX];
+  char pub_path[PATH_MAX];
+
+  if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
+    minisign_err("key dir too long");
+    return 0;
+  }
+
+  if (!safe_join(priv_path, sizeof(priv_path), priv_path, key_name)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_copy(pub_path, sizeof(pub_path), priv_path)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_join(pub_path, sizeof(pub_path), pub_path, ".pub")) {
+    minisign_err("public key path too long");
+    return 0;
+  }
 
   if (access(priv_path, F_OK) == 0) {
     minisign_err("Key file already exists: %s", priv_path);
@@ -129,11 +146,28 @@ minisign_sign(
     return 0;
   }
 
-  char priv_path[PATH_MAX], pub_path[PATH_MAX];
-  const size_t priv_len = snprintf(priv_path, sizeof(priv_path), "%s/%s", key_dir, key_name);
-  if (priv_len >= sizeof(priv_path)) { minisign_err("Private key path too long: %s/%s", key_dir, key_name); return 0; }
-  const size_t pub_len = snprintf(pub_path, sizeof(pub_path), "%s.pub", priv_path);
-  if (pub_len >= sizeof(pub_path)) { minisign_err("Public key path too long: %s.pub", priv_path); return 0; }
+  char priv_path[PATH_MAX];
+  char pub_path[PATH_MAX];
+
+  if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
+    minisign_err("key dir too long");
+    return 0;
+  }
+
+  if (!safe_join(priv_path, sizeof(priv_path), priv_path, key_name)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_copy(pub_path, sizeof(pub_path), priv_path)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_join(pub_path, sizeof(pub_path), pub_path, ".pub")) {
+    minisign_err("public key path too long");
+    return 0;
+  }
 
   if (access(priv_path, F_OK) != 0) {
     minisign_err("Private key file not found: %s", priv_path);
@@ -184,11 +218,28 @@ minisign_sign_file(
     return 0;
   }
 
-  char priv_path[PATH_MAX], pub_path[PATH_MAX];
-  const size_t priv_len = snprintf(priv_path, sizeof(priv_path), "%s/%s", key_dir, key_name);
-  if (priv_len >= sizeof(priv_path)) { minisign_err("Private key path too long: %s/%s", key_dir, key_name); return 0; }
-  const size_t pub_len = snprintf(pub_path, sizeof(pub_path), "%s.pub", priv_path);
-  if (pub_len >= sizeof(pub_path)) { minisign_err("Public key path too long: %s.pub", priv_path); return 0; }
+  char priv_path[PATH_MAX];
+  char pub_path[PATH_MAX];
+
+  if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
+    minisign_err("key dir too long");
+    return 0;
+  }
+
+  if (!safe_join(priv_path, sizeof(priv_path), priv_path, key_name)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_copy(pub_path, sizeof(pub_path), priv_path)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_join(pub_path, sizeof(pub_path), pub_path, ".pub")) {
+    minisign_err("public key path too long");
+    return 0;
+  }
 
   if (access(priv_path, F_OK) != 0) {
     minisign_err("Private key file not found: %s", priv_path);
@@ -234,11 +285,28 @@ minisign_verify_file(
     return 0;
   }
 
-  char priv_path[PATH_MAX], pub_path[PATH_MAX];
-  const size_t priv_len = snprintf(priv_path, sizeof(priv_path), "%s/%s", key_dir, key_name);
-  if (priv_len >= sizeof(priv_path)) { minisign_err("Private key path too long: %s/%s", key_dir, key_name); return 0; }
-  const size_t pub_len = snprintf(pub_path, sizeof(pub_path), "%s.pub", priv_path);
-  if (pub_len >= sizeof(pub_path)) { minisign_err("Public key path too long: %s.pub", priv_path); return 0; }
+  char priv_path[PATH_MAX];
+  char pub_path[PATH_MAX];
+
+  if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
+    minisign_err("key dir too long");
+    return 0;
+  }
+
+  if (!safe_join(priv_path, sizeof(priv_path), priv_path, key_name)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_copy(pub_path, sizeof(pub_path), priv_path)) {
+    minisign_err("private key path too long");
+    return 0;
+  }
+
+  if (!safe_join(pub_path, sizeof(pub_path), pub_path, ".pub")) {
+    minisign_err("public key path too long");
+    return 0;
+  }
 
   PubkeyStruct* pubkey_struct = pubkey_load_file(pub_path);
   if (!pubkey_struct) {
@@ -297,20 +365,65 @@ minisign_verify(
 
 char*
 minisign_read_pubkey(const char* key_name, const char* key_dir) {
-  char path[PATH_MAX];
-  snprintf(path, sizeof(path), "%s/%s.pub", key_dir, key_name);
-  char* res = read_file(path);
-  if (!res)
-    minisign_err("Failed to read public key from %s", path);
+  char pub_path[PATH_MAX];
+
+  if (!safe_join(pub_path, sizeof(pub_path), pub_path, ".pub")) {
+    minisign_err("public key path too long");
+    return NULL;
+  }
+
+  char* res = read_file(pub_path);
+  if (!res) {
+    minisign_err("Failed to read public key from %s", pub_path);
+    return NULL;
+  }
+
   return res;
 }
 
 char*
 minisign_read_seckey(const char* key_name, const char* key_dir) {
-  char path[PATH_MAX];
-  snprintf(path, sizeof(path), "%s/%s", key_dir, key_name);
-  char* res = read_file(path);
-  if (!res)
-    minisign_err("Failed to read private key from %s", path);
+  char priv_path[PATH_MAX];
+
+  if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
+    minisign_err("key dir too long");
+    return NULL;
+  }
+
+  if (!safe_join(priv_path, sizeof(priv_path), priv_path, key_name)) {
+    minisign_err("private key path too long");
+    return NULL;
+  }
+
+  char* res = read_file(priv_path);
+  if (!res) {
+    minisign_err("Failed to read private key from %s", priv_path);
+    return NULL;
+  }
   return res;
+}
+
+int
+safe_copy(char *dst, const size_t n, const char *src) {
+  const size_t l = strlen(src);
+
+  if (l >= n)
+    return 0;
+
+  memcpy(dst, src, l + 1);
+  return 1;
+}
+
+int
+safe_join(char *dst, const size_t n, const char *a, const char *b) {
+  const size_t al = strlen(a);
+  const size_t bl = strlen(b);
+
+  if (al + bl >= n)
+    return 0;
+
+  memmove(dst, a, al);
+  memmove(dst + al, b, bl);
+  dst[al + bl] = 0;
+  return 1;
 }

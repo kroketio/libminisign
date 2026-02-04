@@ -1,7 +1,10 @@
-# libminisign - Sign and Verify
+# minisign-tools - Sign and Verify
 
-libminisign is a dead simple library to sign files and verify signatures from C or C++ applications 
-(via pkgconfig, or CMake). It also comes with CLI tools.
+minisign-tools is both a library, and a collection of CLI tools for signing files and verify 
+signatures. It provides pkgconfig, and CMake config for integration into your application.
+
+It is similar to [signify](https://github.com/aperezdc/signify) from OpenBSD, but based 
+on [minisign](https://github.com/jedisct1/minisign).
 
 ```c
 char key_name[] = "test";
@@ -19,11 +22,11 @@ char* pubkey = minisign_read_pubkey(key_name, key_dir);
 minisign_verify(pubkey, message, sizeof(message)-1, signature);
 ```
 
-This is a library implementation of [Minisign](https://github.com/jedisct1/minisign).
+**warning: ** this project is still in beta.
 
 ## License
 
-Signify is distributed under the terms of the [ISC license](https://opensource.org/licenses/isc-license.txt).
+Minisign is distributed under the terms of the [ISC license](https://opensource.org/licenses/isc-license.txt).
 
 ## API
 
@@ -57,11 +60,37 @@ pubkey: /home/user/.minisign/id_ed25519.pub [RWR8WcW+J8S9CiTxbDlSlSjmwgXRpXmbCkh
 
 A non-interactive mode is also available, see `--help`.
 
+#### sign
+
+Sign a file using a private key.
+
+```text
+$ sign
+Usage:
+  sign <file> [-p <password>] [-c 'trusted comment']
+  sign -i <key> <file> [-p <password>]
+
+Examples:
+  sign /path/to/file
+  sign /path/to/file -p secret
+  sign /path/to/file -p secret -c 'release build'
+  sign -i id_ed25519 /path/to/file -p secret
+  sign -i /path/to/key /path/to/file
+
+Options:
+  -i <key>      Secret key path or name (default: ~/.minisign/id_ed25519)
+  -p <pass>     Password for secret key (optional)
+  -c <comment>  Trusted comment (optional)
+  -h, --help    Show this help message and exit
+  -v, --version Show version information and exit
+```
+
 #### sign-verify
 
 Verify a signed file against a public key.
 
 ```text
+$ sign-verify
 Usage:
   sign-verify [key] <file>
 
@@ -75,10 +104,6 @@ Options:
   -h, --help     Show this help message and exit
   -v, --version  Show version information and exit
 ```
-
-## Example
-
-See [example.cpp](example.cpp).
 
 ## Installation
 
@@ -100,9 +125,9 @@ pass `-DCMAKE_INSTALL_PREFIX=/tmp/test/` to CMake.
 cmake -Bbuild -DCMAKE_INSTALL_PREFIX=/tmp/test/ .
 make -Cbuild -j6 install
 
--- Installing: /tmp/test/lib/libminisign.so.1.2
+-- Installing: /tmp/test/lib/libminisign.so.1.3
 -- Installing: /tmp/test/lib/libminisign.so.1
--- Installing: /tmp/test/lib/libminisign.so
+-- Up-to-date: /tmp/test/lib/libminisign.so
 -- Installing: /tmp/test/include/minisign/minisign.h
 -- Installing: /tmp/test/include/minisign/globals.h
 -- Installing: /tmp/test/lib/cmake/minisign/minisignTargets.cmake
@@ -112,9 +137,14 @@ make -Cbuild -j6 install
 -- Installing: /tmp/test/lib/pkgconfig/minisign.pc
 -- Installing: /tmp/test/bin/sign-keygen
 -- Installing: /tmp/test/bin/sign-verify
+-- Installing: /tmp/test/bin/sign
 ```
 
-## CMake
+## C++ library usage
+
+See [example.cpp](example.cpp).
+
+#### CMake
 
 ```cmake
 cmake_minimum_required(VERSION 3.30)

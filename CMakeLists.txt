@@ -78,6 +78,14 @@ set_target_properties(sign-verify PROPERTIES
         LINK_FLAGS_RELEASE -s
 )
 
+add_executable(sign tools/sign.c)
+target_include_directories(sign PRIVATE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/src>)
+target_link_libraries(sign PRIVATE minisign)
+set_target_properties(sign PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LINK_FLAGS_RELEASE -s
+)
+
 # Install library
 install(TARGETS minisign
         EXPORT minisignTargets
@@ -135,5 +143,10 @@ install(TARGETS sign-keygen
 
 # sign-verify
 install(TARGETS sign-verify
+        RUNTIME DESTINATION bin
+)
+
+# sign
+install(TARGETS sign
         RUNTIME DESTINATION bin
 )

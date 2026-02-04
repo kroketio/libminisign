@@ -327,7 +327,7 @@ decrypt_key(char *const pwd, SeckeyStruct *const seckey_struct, unsigned char ch
   sodium_free(stream);
   seckey_compute_chk(chk, seckey_struct);
   if (memcmp(chk, seckey_struct->keynum_sk.chk, crypto_generichash_BYTES) != 0) {
-    minisign_err("Wrong password for that key");
+    minisign_err("Wrong password for this key");
     return 0;
   }
   sodium_memzero(chk, crypto_generichash_BYTES);
@@ -423,7 +423,9 @@ seckey_load_file(const char* key_path, char *const password, char *const sk_comm
   }
 
   if (memcmp(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg) == 0) {
-    decrypt_key(password, seckey_struct, chk);
+    if (!decrypt_key(password, seckey_struct, chk)) {
+      return NULL;
+    }
   } else if (memcmp(seckey_struct->kdf_alg, KDFNONE, sizeof seckey_struct->kdf_alg) != 0) {
     minisign_err("Unsupported key derivation function");
     return NULL;
