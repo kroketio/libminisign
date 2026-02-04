@@ -6,23 +6,7 @@ signatures. It provides pkgconfig, and CMake config for integration into your ap
 It is similar to [signify](https://github.com/aperezdc/signify) from OpenBSD, but based 
 on [minisign](https://github.com/jedisct1/minisign).
 
-```c
-char key_name[] = "test";
-char key_dir[] = "/home/user/.minisign/";
-char password[] = "test";
-char test_file[] = "/tmp/test_file.txt";
-char test_file_sig[] = "/tmp/test_file.txt.sig";
-  
-minisign_init(key_dir);
-minisign_generate(key_name, key_dir, password);
-
-minisign_sign_file(key_name, key_dir, password, test_file, test_file_sig, "foo", "bar", 1);
-
-char* pubkey = minisign_read_pubkey(key_name, key_dir);
-minisign_verify(pubkey, message, sizeof(message)-1, signature);
-```
-
-**warning: ** this project is still in beta.
+**warning:** this project is still in beta.
 
 ## License
 
