@@ -102,7 +102,7 @@ int main(const int argc, char **argv) {
   if (input_key) {
     if (strchr(input_key, '/')) {
       // full path
-      char tmp[PATH_MAX];
+      char tmp[PATH_MAX] = {0};
       if (!safe_copy(tmp, sizeof(tmp), input_key)) {
         minisign_err("key path too long");
         return 1;
@@ -171,7 +171,7 @@ int main(const int argc, char **argv) {
 
   // expand ~/ in key_dir
   if (key_dir[0] == '~' && key_dir[1] == '/') {
-    char tmp[PATH_MAX];
+    char tmp[PATH_MAX] = {0};
     if (!safe_join(tmp, sizeof(tmp), home, key_dir + 1)) {
       minisign_err("key dir too long");
       return 1;

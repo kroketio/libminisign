@@ -85,8 +85,8 @@ minisign_generate(const char* key_name, const char* key_dir, const char* passwor
     return 0;
   }
 
-  char priv_path[PATH_MAX];
-  char pub_path[PATH_MAX];
+  char priv_path[PATH_MAX] = {0};
+  char pub_path[PATH_MAX] = {0};
 
   if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
     minisign_err("key dir too long");
@@ -146,8 +146,8 @@ minisign_sign(
     return 0;
   }
 
-  char priv_path[PATH_MAX];
-  char pub_path[PATH_MAX];
+  char priv_path[PATH_MAX] = {0};
+  char pub_path[PATH_MAX] = {0};
 
   if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
     minisign_err("key dir too long");
@@ -218,8 +218,8 @@ minisign_sign_file(
     return 0;
   }
 
-  char priv_path[PATH_MAX];
-  char pub_path[PATH_MAX];
+  char priv_path[PATH_MAX] = {0};
+  char pub_path[PATH_MAX] = {0};
 
   if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
     minisign_err("key dir too long");
@@ -285,8 +285,8 @@ minisign_verify_file(
     return 0;
   }
 
-  char priv_path[PATH_MAX];
-  char pub_path[PATH_MAX];
+  char priv_path[PATH_MAX] = {0};
+  char pub_path[PATH_MAX] = {0};
 
   if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
     minisign_err("key dir too long");
@@ -365,11 +365,21 @@ minisign_verify(
 
 char*
 minisign_read_pubkey(const char* key_name, const char* key_dir) {
-  char pub_path[PATH_MAX];
+  char pub_path[PATH_MAX] = {0};
+
+  if (!safe_copy(pub_path, sizeof(pub_path), key_dir)) {
+    minisign_err("key dir too long");
+    return NULL;
+  }
+
+  if (!safe_join(pub_path, sizeof(pub_path), pub_path, key_name)) {
+    minisign_err("pub key path too long");
+    return NULL;
+  }
 
   if (!safe_join(pub_path, sizeof(pub_path), pub_path, ".pub")) {
     minisign_err("public key path too long");
-    return NULL;
+    return 0;
   }
 
   char* res = read_file(pub_path);
@@ -383,7 +393,7 @@ minisign_read_pubkey(const char* key_name, const char* key_dir) {
 
 char*
 minisign_read_seckey(const char* key_name, const char* key_dir) {
-  char priv_path[PATH_MAX];
+  char priv_path[PATH_MAX] = {0};
 
   if (!safe_copy(priv_path, sizeof(priv_path), key_dir)) {
     minisign_err("key dir too long");

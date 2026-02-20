@@ -41,8 +41,6 @@ extern int MINISIGN_INIT;
 #define SECRETKEY_DEFAULT_COMMENT      "minisign encrypted secret key"
 #define SIG_DEFAULT_CONFIG_DIR         ".minisign"
 #define SIG_DEFAULT_CONFIG_DIR_ENV_VAR "MINISIGN_CONFIG_DIR"
-#define SIG_DEFAULT_PKFILE             "minisign.pub"
-#define SIG_DEFAULT_SKFILE             "minisign.key"
 #define SIG_SUFFIX                     ".minisig"
 #define VERSION_STRING                 "minisign 0.12"
 

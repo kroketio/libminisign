@@ -87,11 +87,11 @@ main(const int argc, char **argv) {
     }
   }
 
-  char path[PATH_MAX];
-  char priv_path[PATH_MAX];
-  char key_dir[PATH_MAX];
-  char key_name[PATH_MAX];
-  char pub_path[PATH_MAX];
+  char path[PATH_MAX] = {0};
+  char priv_path[PATH_MAX] = {0};
+  char key_dir[PATH_MAX] = {0};
+  char key_name[PATH_MAX] = {0};
+  char pub_path[PATH_MAX] = {0};
   char *slash;
   char *pub = 0;
 

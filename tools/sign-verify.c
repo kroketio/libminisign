@@ -107,7 +107,7 @@ int main(const int argc, char **argv) {
         }
       }
 
-      char tmp[PATH_MAX];
+      char tmp[PATH_MAX] = {0};
       if (!safe_copy(tmp, sizeof(tmp), pub_path)) {
         minisign_err("pubkey path too long");
         return 1;

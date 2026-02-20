@@ -131,12 +131,7 @@ sig_load(const char *sig_contents,
           trusted_comment + sizeof(TRUSTED_COMMENT_PREFIX) - 1U,
           strlen(trusted_comment + sizeof(TRUSTED_COMMENT_PREFIX) - 1U) + 1U);
 
-  if (trim(trusted_comment) == 0) {
-    minisign_err("Trusted comment too long");
-    free(contents_copy);
-    free(sig_s);
-    return NULL;
-  }
+  trim(trusted_comment);
 
   if (is_printable(trusted_comment) == 0) {
     minisign_err("Trusted comment contains unprintable characters");
